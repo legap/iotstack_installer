@@ -26,7 +26,7 @@ else
   git clone https://github.com/SensorsIot/IOTstack.git ${iotStackDir}
 fi
 
-if [ "$(egrep -c "^allowinterfaces eth*,wlan*" /etc/dhcpcd.conf)" -eq 0 ]; then
+if [ "$(grep --perl-regexp "^allowinterfaces\w*(?=.*eth.*)(?=.*wlan.*)")" -eq 0 ]; then
   echo "================================================================================"
   echo "restricting dhcp access to avoid conflicts between docker and dhcpd"
   echo "--------------------------------------------------------------------------------"
