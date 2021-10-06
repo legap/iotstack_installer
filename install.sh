@@ -26,7 +26,7 @@ else
   git clone https://github.com/SensorsIot/IOTstack.git ${iotStackDir}
 fi
 
-if [ "$(grep --perl-regexp --count "^allowinterfaces\w*(?=.*eth.*)(?=.*wlan.*)"  /etc/dhcpcd.conf)" -eq 0 ]; then
+if [ "$(grep --perl-regexp --count "^allowinterfaces\w*(?=.*eth.*)(?=.*wlan.*)" /etc/dhcpcd.conf)" -eq 0 ]; then
   echo "================================================================================"
   echo "restricting dhcp access to avoid conflicts between docker and dhcpd"
   echo "--------------------------------------------------------------------------------"
@@ -44,15 +44,30 @@ if [ ! -f ${debianBackportsSource} ]; then
   sudo apt install libseccomp2 -t buster-backports
 fi
 
-# install latest docker version
 echo "================================================================================"
 echo "install latest docker and docker-compose version"
 echo "--------------------------------------------------------------------------------"
 curl -fsSL https://get.docker.com | sh
 
-# add current user to docker and bluetooth groups
 echo "================================================================================"
 echo "add current user to required groups"
 echo "--------------------------------------------------------------------------------"
 sudo usermod -G docker -a "${USER}"
 sudo usermod -G bluetooth -a "${USER}"
+
+if [ "$(uname -m)" == "aarch64" ]; then
+  echo "================================================================================"
+  echo "add additional foreign function interface library on 64-bit kernel version"
+  echo "--------------------------------------------------------------------------------"
+  sudo apt install libffi-dev
+fi
+
+echo "================================================================================"
+echo "pip install docker-compose"
+echo "--------------------------------------------------------------------------------"
+sudo pip3 install -U docker-compose
+
+echo "================================================================================"
+echo "pip install ruamel and blessed"
+echo "--------------------------------------------------------------------------------"
+sudo pip3 install -U ruamel.yaml==0.16.12 blessed
