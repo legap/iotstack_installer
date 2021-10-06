@@ -26,20 +26,23 @@ else
   git clone https://github.com/SensorsIot/IOTstack.git ${iotStackDir}
 fi
 
-echo "================================================================================"
-echo "restricting dhcp access to avoid conflicts between docker and dhcpd"
-echo "--------------------------------------------------------------------------------"
 if [ "$(egrep -c "^allowinterfaces eth*,wlan*" /etc/dhcpcd.conf)" -eq 0 ]; then
+  echo "================================================================================"
+  echo "restricting dhcp access to avoid conflicts between docker and dhcpd"
+  echo "--------------------------------------------------------------------------------"
   echo "allowinterfaces eth*,wlan*" >>/etc/dhcpcd.conf
 fi
 
-echo "================================================================================"
-echo "update library libseccomp2 to avoid problems with alpine linux"
-echo "--------------------------------------------------------------------------------"
-sudo apt-key adv --keyserver hkps://keyserver.ubuntu.com:443 --recv-keys 04EE7237B7D453EC 648ACFD622F3D138
-echo "deb http://httpredir.debian.org/debian buster-backports main contrib non-free" | sudo tee -a "/etc/apt/sources.list.d/debian-backports.list"
-sudo apt update
-sudo apt install libseccomp2 -t buster-backports
+debianBackportsSource="/etc/apt/sources.list.d/debian-backports.list"
+if [ ! -f ${debianBackportsSource} ]; then
+  echo "================================================================================"
+  echo "update library libseccomp2 to avoid problems with alpine linux"
+  echo "--------------------------------------------------------------------------------"
+  sudo apt-key adv --keyserver hkps://keyserver.ubuntu.com:443 --recv-keys 04EE7237B7D453EC 648ACFD622F3D138
+  echo "deb http://httpredir.debian.org/debian buster-backports main contrib non-free" | sudo tee -a ${debianBackportsSource}
+  sudo apt update
+  sudo apt install libseccomp2 -t buster-backports
+fi
 
 # install latest docker version
 echo "================================================================================"
@@ -53,4 +56,3 @@ echo "add current user to required groups"
 echo "--------------------------------------------------------------------------------"
 sudo usermod -G docker -a "${USER}"
 sudo usermod -G bluetooth -a "${USER}"
-
